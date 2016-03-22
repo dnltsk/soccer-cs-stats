@@ -2,3 +2,4 @@ db-config.properties
 *.jar
 .Rhistory
 .RDataTmp
+.RData

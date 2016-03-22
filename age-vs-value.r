@@ -20,10 +20,6 @@ testdb <- dbConnect(pgsql,
 
 ageValues <- dbGetQuery(testdb, "SELECT  p.id, p.full_name, v.date, (v.date - p.birth_date)/365.0 as age, v.value_in_mio FROM player p, player_market_value v where p.id = v.id_player order by p.id, v.date")
 
-str(ageValues)
-
-x <- head(ageValues, n=50)
-
 ggplot(ageValues, aes(age, value_in_mio, group=id, color=full_name)) +
   geom_line() +
   theme(legend.position="none")

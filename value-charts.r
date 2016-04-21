@@ -17,12 +17,28 @@ ggplot(ageValues, aes(age, value_in_mio, group=id, color=position_vertical)) +
   ggtitle("Player's age vs. Player's market value")
 
 
-
 ggplot(ageValues, aes(as.Date(date), value_in_mio, group=id, color=position_vertical)) +
   geom_line() +
   scale_x_date() +
   theme(legend.position="bottom") +
   ggtitle("Date vs. Player's market value")
+
+
+yearValues <- dbGetQuery(con, "SELECT  p.id, p.full_name, p.position_vertical, EXTRACT(YEAR FROM v.date) as year, max(v.value_in_mio) as value_in_mio
+                               FROM player p, player_market_value v
+                               WHERE p.id = v.id_player 
+                               GROUP BY p.id, p.full_name, p.position_vertical, year")
+
+ggplot(yearValues, aes(year, value_in_mio, group=interaction(year, position_vertical), colour=position_vertical)) +
+  geom_boxplot(position=position_dodge(width=0.9), width=1) +
+  stat_summary(fun.y=median, geom="line", position=position_dodge(width=0.9), 
+               aes(group=position_vertical)) +
+  stat_summary(fun.y=median, geom="point", size=2,  position=position_dodge(width=0.9), 
+               aes(group=position_vertical)) +
+  scale_x_continuous(breaks=unique(yearValues$year)) +
+  theme(legend.position="bottom") +
+  ggtitle("median market value by year and position")
+
 
 #cleanup
 dbDisconnect(con)

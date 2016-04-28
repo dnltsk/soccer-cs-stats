@@ -3,7 +3,7 @@ require("RPostgreSQL")
 require("ggplot2")
 require("Cairo")
 
-setwd("D:/Projekte/soccer-cs-stats/market-value")
+setwd("/projects/soccer-cs-stats/market-value/")
 
 dbConfig <- read.properties("../db-config.properties")
 

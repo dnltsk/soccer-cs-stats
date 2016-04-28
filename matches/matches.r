@@ -33,7 +33,6 @@ matches <- dbGetQuery(con,
               from x
               group by id, date, home, guest, home_goals, guest_goals")
 
-names(matches)
 M <- cor(matches[, c("home_goals", "guest_goals",
                      "h_keeper_value", "h_defense_value", "h_midfield_value", "h_offense_value",
                      "g_keeper_value", "g_defense_value", "g_midfield_value", "g_offense_value")])

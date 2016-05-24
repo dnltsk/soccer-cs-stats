@@ -22,25 +22,41 @@ matches <- dbGetQuery(con,
                             and p.id = pm.id_player
               )
               select x.id, x.date, x.home, x.guest, x.home_goals, x.guest_goals,
-              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.home = x2.nationality and x2.position_vertical = 'KEEPER') as g_keeper_value,
-              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.home = x2.nationality and x2.position_vertical = 'DEFENSE') as g_defense_value,
-              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.home = x2.nationality and x2.position_vertical = 'MIDFIELD') as g_midfield_value,
-              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.home = x2.nationality and x2.position_vertical = 'OFFENSE') as g_offense_value,
-              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.guest = x2.nationality and x2.position_vertical = 'KEEPER') as h_keeper_value,
-              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.guest = x2.nationality and x2.position_vertical = 'DEFENSE') as h_defense_value,
-              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.guest = x2.nationality and x2.position_vertical = 'MIDFIELD') as h_midfield_value,
-              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.guest = x2.nationality and x2.position_vertical = 'OFFENSE') as h_offense_value
+              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.home = x2.nationality) as h_complete_value,
+              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.guest = x2.nationality) as g_complete_value,
+              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.home = x2.nationality and x2.position_vertical = 'KEEPER') as h_keeper_value,
+              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.home = x2.nationality and x2.position_vertical = 'DEFENSE') as h_defense_value,
+              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.home = x2.nationality and x2.position_vertical = 'MIDFIELD') as h_midfield_value,
+              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.home = x2.nationality and x2.position_vertical = 'OFFENSE') as h_offense_value,
+              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.guest = x2.nationality and x2.position_vertical = 'KEEPER') as g_keeper_value,
+              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.guest = x2.nationality and x2.position_vertical = 'DEFENSE') as g_defense_value,
+              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.guest = x2.nationality and x2.position_vertical = 'MIDFIELD') as g_midfield_value,
+              (select COALESCE(sum(current_value), 0) from x as x2 where x.id = x2.id and x.guest = x2.nationality and x2.position_vertical = 'OFFENSE') as g_offense_value
               from x
               group by id, date, home, guest, home_goals, guest_goals")
+
+M.small <- cor(matches[, c("home_goals", "guest_goals",
+                     "h_complete_value", "g_complete_value")])
+
+png(height=500, width=500, file="corrplot_complete.png")
+corrplot(M.small, 
+         method="circle", 
+         mar=c(0,0,2,0),
+         addCoef.col="gold",
+         title="correlation plot of GOALS vs. MARKET VALUES of whole team")
+dev.off()
+
+
 
 M <- cor(matches[, c("home_goals", "guest_goals",
                      "h_keeper_value", "h_defense_value", "h_midfield_value", "h_offense_value",
                      "g_keeper_value", "g_defense_value", "g_midfield_value", "g_offense_value")])
 
-png(height=600, width=600, file="corrplot.png")
+png(height=600, width=600, file="corrplot_positions.png")
 corrplot(M, 
          method="circle", 
          mar=c(0,0,2,0),
+         addCoef.col="gold",
          title="correlation plot of GOALS vs. aggregated MARKET VALUES on position")
 dev.off()
 

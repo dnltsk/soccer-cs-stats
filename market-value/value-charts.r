@@ -6,7 +6,6 @@ require("Cairo")
 setwd("/projects/soccer-cs-stats/market-value/")
 
 dbConfig <- read.properties("../db-config.properties")
-
 drv <- dbDriver("PostgreSQL")
 con <- dbConnect(drv, dbname=dbConfig$dbname,host=dbConfig$host,port=dbConfig$port,user=dbConfig$user,password=dbConfig$pass) 
 

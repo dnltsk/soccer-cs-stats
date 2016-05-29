@@ -1,5 +1,5 @@
 # soccer-cs-stats
-simple comparisson and explorative data analysis of some soccer data.
+Comparisson and explorative data analysis of soccer championship data. The insights are getting used in [soccer-cs-prediction](https://github.com/teeschke/soccer-cs-prediction).
 
 ### data source
 Data from [Fuﬂballdaten.de](http://www.fussballdaten.de) and [Transfermarkt.de](http://www.transfermarkt.de). Postgres DB hosted on Heroku.

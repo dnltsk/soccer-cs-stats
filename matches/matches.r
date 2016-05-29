@@ -7,7 +7,6 @@ require("corrplot")
 setwd("/projects/soccer-cs-stats/matches")
 
 dbConfig <- read.properties("../db-config.properties")
-
 drv <- dbDriver("PostgreSQL")
 con <- dbConnect(drv, dbname=dbConfig$dbname,host=dbConfig$host,port=dbConfig$port,user=dbConfig$user,password=dbConfig$pass) 
 
@@ -35,8 +34,35 @@ matches <- dbGetQuery(con,
               from x
               group by id, date, home, guest, home_goals, guest_goals, diff_goals")
 
-M.small <- cor(matches[, c("home_goals", "guest_goals", "diff_goals",
-                     "h_complete_value", "g_complete_value")])
+#
+# interpred both game perspectived as a single game!!!
+#
+matches.switched <- data.frame(id=matches$id*10, 
+                               date = matches$date,
+                               home = matches$guest,
+                               guest = matches$home,
+                               home_goals = matches$guest_goals,
+                               guest_goals = matches$home_goals,
+                               diff_goals = -1 * matches$diff_goals,
+                               h_complete_value = matches$g_complete_value,
+                               g_complete_value = matches$h_complete_value,
+                               h_keeper_value = matches$g_keeper_value,
+                               h_defense_value = matches$g_defense_value,
+                               h_midfield_value = matches$g_midfield_value,
+                               h_offense_value = matches$g_offense_value,
+                               g_keeper_value = matches$h_keeper_value,
+                               g_defense_value = matches$h_defense_value,
+                               g_midfield_value = matches$h_midfield_value,
+                               g_offense_value = matches$h_offense_value)
+                               
+
+
+plot(jitter(matches.small$h_complete_value, factor=100), jitter(matches.small$g_complete_value, factor=100), 
+     pch=20, cex=1, col=(matches.small$diff_goals - min(matches.small$diff_goals)))
+text(jitter(matches.small$h_complete_value, factor=100), jitter(matches.small$g_complete_value, factor=100),
+     labels = matches.small$diff_goals, cex=.75)
+
+M.small <- cor(matches.small)
 
 png(height=500, width=500, file="corrplot_complete.png")
 corrplot(M.small, 
@@ -60,35 +86,8 @@ corrplot(M,
          title="correlation plot of GOALS vs. aggregated MARKET VALUES on position")
 dev.off()
 
-
-#
-# PREDICTION
-#
-# Inspired from http://www.r-bloggers.com/using-neural-networks-for-credit-scoring-a-simple-example/
-#
-install.packages("neuralnet")
-require("neuralnet")
-
-perc <- NROW(matches.nums)*0.75
-trainset <- matches.nums[1:perc, ]
-testset <- matches.nums[(perc+1):NROW(matches.nums), ]
-
-# train
-nn <- neuralnet(diff_goals ~ h_keeper_value + h_defense_value + h_midfield_value + h_offense_value + g_keeper_value + g_defense_value + g_midfield_value + g_offense_value,
-                data=trainset, hidden=8, lifesign = "minimal", linear.output = FALSE, threshold = 0.1)
-plot(nn)
-
-# test
-temp_test <- testset[, c("h_keeper_value", "h_defense_value", "h_midfield_value", "h_offense_value", "g_keeper_value", "g_defense_value", "g_midfield_value", "g_offense_value")]
-test_result <- compute(nn, temp_test)
-
-#report
-results <- data.frame(actual = testset$diff_goals, 
-                      prediction = test_result$net.result)
-results
-plot(results)
-
-
-
 #cleanup
 dbDisconnect(con)
+
+
+
